@@ -1,0 +1,223 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adAvailabilitySetName": {
+      "type": "string",
+      "defaultValue": "adAvSet"
+    },
+    "adIPs": {
+      "type": "array",
+      "metadata": { "description": "The IP Addresses assigned to the domain controllers (a, b). Remember the first IP in a subnet is .4 e.g. 10.0.0.0/16 reserves 10.0.0.0-3. Specify one IP per server - must match numberofVMInstances or deployment will fail.s" },
+      "defaultValue": [ "10.0.1.4", "10.0.1.5" ]
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Admin password"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin username"
+      }
+    },
+    "adSubnetName": {
+      "type": "string",
+      "defaultValue": "adSubnet"
+    },
+    "adVMName": {
+      "type": "string",
+      "defaultValue": "AZAD"
+    },
+    "assetLocation": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "allowedValues": [
+        "Central US",
+        "East US",
+        "East US2",
+        "North Central US",
+        "South Central US",
+        "West US",
+        "North Europe",
+        "West Europe",
+        "East Asia",
+        "Southeast Asia",
+        "Japan East",
+        "Japan West",
+        "Brazil South",
+        "Australia East",
+        "Australia Southeast",
+        "Central India",
+        "South India",
+        "West India"
+      ],
+      "metadata": {
+        "Description": "The region to deploy the resources into"
+      }
+    },
+    "NetworkInterfaceName": {
+      "type": "string",
+      "defaultValue": "NIC",
+      "metadata": {
+        "description": "This is the prefix name of the Network interfaces"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage account name"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "vnet"
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D1",
+      "metadata": {
+        "description": "This is the allowed list of VM sizes"
+      }
+    }
+  },
+
+  "variables": {
+    "adDSCConfigurationFunction": "adDSCConfiguration.ps1\\Main",
+    "adDSCTemplate": "[concat(parameters('assetLocation'), 'DSC/adDSC.zip')]",
+    "adSubnetID": "[concat(variables('vnetID'),'/subnets/', parameters('adSubnetName'))]",
+    "imageOffer": "WindowsServer",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageSKU": "2012-R2-Datacenter",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+  },
+ 
+
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('adAvailabilitySetName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "adAvailabilitySet"
+      },
+      "properties": { }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat('ad-',parameters('NetworkInterfaceName'), copyindex())]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "adNICs" },
+      "copy": {
+        "name": "nicLoop",
+        "count": 2
+      },
+      "dependsOn": [
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[variables('adSubnetID')]"
+              },
+              "privateIPAddress": "[parameters('adIPs')[copyindex()]]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('advmName'), copyindex())]",
+      "copy": {
+        "name": "virtualMachineLoop",
+        "count": 2
+      },
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "adVirtualMachines" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', 'ad-', parameters('NetworkInterfaceName'), copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', parameters('adavailabilitySetName'))]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('adavailabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('advmName'), copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net/vhds/', parameters('adVMName'), 'osdisk', copyindex(), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceid('Microsoft.Network/networkInterfaces', concat('ad-', parameters('NetworkInterfaceName'), copyindex()))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      },
+     "resources": [
+      {
+        "name": "adDSCConfiguration",
+        "type": "extensions",
+        "location": "[parameters('location')]",
+        "apiVersion": "2015-06-15",
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('adVMName'), copyindex()))]"
+        ],
+        "tags": {
+          "displayName": "adDSCConfiguration"
+        },
+        "properties": {
+          "publisher": "Microsoft.Powershell",
+          "type": "DSC",
+          "typeHandlerVersion": "2.9",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+            "modulesUrl": "[variables('adDSCTemplate')]",
+            "configurationFunction": "[variables('adDSCConfigurationFunction')]",
+            "properties": {
+              "nodeName": "[concat(parameters('adVMName'), copyindex())]"
+            }
+          },
+          "protectedSettings": { }
+        }
+      }
+      ]    }
+  ]
+}

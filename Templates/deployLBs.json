@@ -1,0 +1,158 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adfsLoadBalancerName": { "type": "string" },
+    "adfsSubnetID": { "type": "string" },
+    "ilbIP": { "type": "string" },
+    "location": { "type": "string" },
+    "numberofVMInstances": { "type": "int" },
+    "publicIPAddressDNSName": { "type": "string" },
+    "publicIPAddressID": { "type": "string" },
+    "wapLoadBalancerName": { "type": "string" }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[parameters('adfsLoadBalancerName')]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "adfsLB" },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "properties": {
+              "subnet": {
+                "id": "[parameters('adfsSubnetID')]"
+              },
+              "privateIPAddress": "[parameters('ilbIP')]",
+              "privateIPAllocationMethod": "Static"
+            },
+            "name": "LoadBalancerFrontend"
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "backendPool1"
+          }
+        ],
+
+
+        "loadBalancingRules": [
+          {
+            "name": "ADFSLBRules",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/frontendIpConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/backendAddressPools/backendPool1')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/probes/lbprobe')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 443,
+              "backendPort": 443,
+              "idleTimeoutInMinutes": 15
+            },
+            "Name": "lbrule"
+          }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 443,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            },
+            "name": "lbprobe"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[parameters('wapLoadBalancerName')]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "wapLB" },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "LoadBalancerFrontend",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[parameters('publicIPAddressID')]"
+              }
+            }
+          }
+
+        ],
+        "backendAddressPools": [
+          {
+            "name": "backendPool1"
+          }
+        ],
+
+        "loadBalancingRules": [
+          {
+            "name": "wapLBRules",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/frontendIpConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/backendAddressPools/backendPool1')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/probes/lbprobe')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 443,
+              "backendPort": 443,
+              "idleTimeoutInMinutes": 15
+            },
+            "Name": "lbrule"
+          }
+
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 443,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            },
+            "name": "lbprobe"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(parameters('wapLoadBalancerName'), '/', 'RDP-VM', copyIndex())]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "inboundNATRuleRDP" },
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfVMInstances')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers',parameters('wapLoadBalancerName'))]"
+      ],
+      "properties": {
+        "frontendIPConfiguration": {
+          "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/frontendIpConfigurations/LoadBalancerFrontend')]"
+        },
+        "protocol": "tcp",
+        "frontendPort": "[copyIndex(5000)]",
+        "backendPort": 3389,
+        "enableFloatingIP": false
+      }
+    }
+  ]
+}

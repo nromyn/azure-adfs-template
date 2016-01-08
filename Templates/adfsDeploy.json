@@ -1,0 +1,546 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adfsAvailabilitySetName": {
+      "type": "string",
+      "defaultValue": "adfsAvSet"
+    },
+
+    "adfsLoadBalancerName": {
+      "type": "string",
+      "defaultValue": "ADFS-LB"
+    },
+    "adfsNSGName": {
+      "type": "string",
+      "defaultValue": "INT-ADFS"
+    },
+    "adfsSubnetName": {
+      "type": "string",
+      "defaultValue": "adSubnet"
+    },
+    "adfsVMName": {
+      "type": "string",
+      "defaultValue": "AZADFS"
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Admin password"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin username"
+      }
+    },
+    "assetLocation": {
+      "type": "string"
+    },
+    "dmzSubnetName": {
+      "type": "string",
+      "defaultValue": "adSubnet"
+    },
+    "ilbIP": {
+      "type": "string",
+      "defaultValue": "10.0.2.10",
+      "metadata": { "description": "The IP used for the ADFS Load Balancer (Internal)" }
+    },
+    "location": {
+      "type": "string",
+      "allowedValues": [
+        "Central US",
+        "East US",
+        "East US2",
+        "North Central US",
+        "South Central US",
+        "West US",
+        "North Europe",
+        "West Europe",
+        "East Asia",
+        "Southeast Asia",
+        "Japan East",
+        "Japan West",
+        "Brazil South",
+        "Australia East",
+        "Australia Southeast",
+        "Central India",
+        "South India",
+        "West India"
+      ],
+      "metadata": {
+        "Description": "The region to deploy the resources into"
+      }
+    },
+    "NetworkInterfaceName": {
+      "type": "string",
+      "defaultValue": "NIC",
+      "metadata": {
+        "description": "This is the prefix name of the Network interfaces"
+      }
+    },
+    "numberofVMInstances": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": { "description": "The number of ADFS and WAP VMs to build" }
+    },
+    "publicIPAddressDNSName": {
+      "type": "string"
+    },
+    "rdpIPAddressDNSName": {
+      "type": "string"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage account name"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "vnet"
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D1",
+      "metadata": {
+        "description": "This is the allowed list of VM sizes"
+      }
+    },
+    "wapAvailabilitySetName": {
+      "type": "string",
+      "defaultValue": "wapAvSet"
+    },
+    "wapLoadBalancerName": {
+      "type": "string",
+      "defaultValue": "WAP-LB"
+    },
+    "wapVMName": {
+      "type": "string",
+      "defaultValue": "AZPROX"
+    }
+  },
+
+  "variables": {
+    "adfsDSCConfigurationFunction": "adfsDSCConfiguration.ps1\\Main",
+    "adfsDSCTemplate": "[concat(parameters('assetLocation'),'DSC/adfsDSC.zip')]",
+    "adfsSubnetID": "[concat(variables('vnetID'),'/subnets/',parameters('adfsSubnetName'))]",
+    "dmzSubnetID": "[concat(variables('vnetID'),'/subnets/',parameters('dmzSubnetName'))]",
+    "imageOffer": "WindowsServer",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageSKU": "2012-R2-Datacenter",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+    "wapDSCTemplate": "[concat(parameters('assetLocation'),'/DSC/wapDSCConfiguration.ps1')]",
+    "wapDSCConfigurationFunction": "wapDSCConfiguration.ps1\\Main"
+  },
+
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('adfsAvailabilitySetName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "adfsAvailabilitySet"
+      },
+      "properties": { }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('wapAvailabilitySetName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "wapAvailabilitySet"
+      },
+      "properties": {
+
+      }
+
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[parameters('adfsLoadBalancerName')]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "adfsLB" },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "ADFSLBFE",
+            "properties": {
+              "subnet": {
+                "id": "[variables('adfsSubnetID')]"
+              },
+              "privateIPAddress": "[parameters('ilbIP')]",
+              "privateIPAllocationMethod": "Static",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('rdpIPAddressDNSname'))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "ADFSLBBE"
+          }
+        ],
+
+
+        "loadBalancingRules": [
+          {
+            "name": "ADFSLBRules",
+            "properties": {
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/backendAddressPools/ADFSLBBE')]"
+              },
+              "backendPort": 443,
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/frontendIpConfigurations/ADFSLBFE')]"
+              },
+              "frontendPort": 443,
+              "idleTimeoutInMinutes": 15,
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/probes/ADFSLBprobe')]"
+              },
+              "protocol": "Tcp"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "ADFSLBprobe",
+            "properties": {
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2,
+              "port": 443,
+              "protocol": "Tcp"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers",
+      "name": "[parameters('wapLoadBalancerName')]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "wapLB" },
+      "properties": {
+        "backendAddressPools": [
+          {"name": "WAPLBBE"}
+        ],
+        "frontendIPConfigurations": [
+          {
+            "name": "WAPLBFE",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressDNSname'))]"
+              }
+            }
+          }
+
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "wapLBRules",
+            "properties": {
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/backendAddressPools/WAPLBBE')]"
+              },
+              "backendPort": 443,
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/frontendIpConfigurations/WAPLBFE')]"
+              },
+              "frontendPort": 443,
+              "idleTimeoutInMinutes": 15,
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/probes/WAPLBprobe')]"
+              },
+              "protocol": "Tcp"
+            }
+          }
+
+        ],
+        "probes": [
+          {
+            "name": "WAPLBprobe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 443,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
+      "name": "[concat(parameters('wapLoadBalancerName'), '/', 'RDP-VM', copyIndex())]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "inboundNATRuleRDP" },
+      "copy": {
+        "name": "lbNatLoop",
+        "count": "[parameters('numberOfVMInstances')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers',parameters('adfsLoadBalancerName'))]",
+      ],
+      "properties": {
+        "backendPort": 3389,
+        "backendAddressPools": { "name": "ADFSLBBE" },
+        "enableFloatingIP": false,
+        "frontendIPConfiguration": {
+          "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/frontendIpConfigurations/adfssLBFE')]"
+        },
+        "frontendPort": "[copyIndex(5000)]",
+        "protocol": "tcp"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat('adfs-',parameters('NetworkInterfaceName'), copyindex())]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "adfsNICs" },
+      "copy": {
+        "name": "nicLoop",
+        "count": "[parameters('numberofVMInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/',parameters('adfsLoadBalancerName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/inboundNatRules/RDP-VM', copyindex())]"
+                }
+              ],
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/backendAddressPools/ADFSLBBE')]"
+                }
+              ],
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('adfsSubnetID')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('adfsNSGName'))]" }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat('wap-',parameters('NetworkInterfaceName'), copyindex())]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "dmzNICs" },
+      "copy": {
+        "name": "nicLoop",
+        "count": "[parameters('numberofVMInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/',parameters('wapLoadBalancerName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('dmzSubnetId')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('wapLoadBalancerName')), '/backendAddressPools/WAPLBBE')]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('adfsVMName'), copyindex())]",
+      "copy": {
+        "name": "virtualMachineLoop",
+        "count": "[parameters('numberofVMInstances')]"
+      },
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "adfsVirtualMachines" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', 'adfs-',parameters('NetworkInterfaceName'), copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', parameters('adfsAvailabilitySetName'))]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('adfsAvailabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('adfsVMName'), copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net/vhds/', parameters('adfsVMName'), 'osdisk', copyindex(), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceid('Microsoft.Network/networkInterfaces', concat('adfs-', parameters('NetworkInterfaceName'), copyindex()))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      },
+      "resources": [
+        {
+          "name": "adfsDSCConfiguration",
+          "type": "extensions",
+          "location": "[parameters('location')]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('adfsVMName'), copyindex()))]"
+          ],
+          "tags": {
+            "displayName": "adfsDSCConfiguration"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[variables('adfsDSCTemplate')]",
+              "configurationFunction": "[variables('adfsDSCConfigurationFunction')]",
+              "properties": {
+                "nodeName": "[concat(parameters('adfsVMName'), copyindex())]"
+              }
+            },
+            "protectedSettings": { }
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('wapVMName'), copyindex())]",
+      "copy": {
+        "name": "virtualMachineLoop",
+        "count": "[parameters('numberofVMInstances')]"
+      },
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "wapVirtualMachines" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', 'wap-', parameters('NetworkInterfaceName'), copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', parameters('wapAvailabilitySetName'))]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('wapAvailabilitySetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('wapVMName'), copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net/vhds/', parameters('wapVMName'), 'osdisk', copyindex(), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceid('Microsoft.Network/networkInterfaces', concat('wap-', parameters('NetworkInterfaceName'), copyindex()))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      },
+      "resources": [
+        {
+          "name": "wapDSC",
+          "type": "extensions",
+          "location": "[parameters('location')]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('wapVMName'), copyindex()))]"
+          ],
+          "tags": {
+            "displayName": "wapDSC"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[variables('adfsDSCTemplate')]",
+              "configurationFunction": "[variables('adfsDSCConfigurationFunction')]",
+              "properties": {
+                "nodeName": "[concat(parameters('adfsVMName'), copyindex())]"
+              }
+            },
+            "protectedSettings": { }
+          }
+        }
+
+
+      ]
+    }
+  ]
+}
