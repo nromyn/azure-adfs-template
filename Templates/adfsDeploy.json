@@ -171,9 +171,8 @@
             "name": "ADFSLBFE",
             "properties": {
               "subnet": {
-                {
 
-                  "id": "[ variables('adfsSubnetID') ]"}
+                  "id": "[ variables('adfsSubnetID') ]"
               },
               "privateIPAddress": "[parameters('ilbIP')]",
               "privateIPAllocationMethod": "Static"
