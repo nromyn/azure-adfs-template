@@ -336,9 +336,13 @@
               ]
             }
           }
-        ]
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceID('Microsoft.Network/NetworkSecurityGroup/networkSecurityGroups,variables('dmzNSGName')]"
+        }
+
       }
-    },
+      },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",

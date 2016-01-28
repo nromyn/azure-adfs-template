@@ -7,11 +7,7 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration
 
 Node $nodeName
   {
-    WindowsFeature RSAT
-    {
-      Name = "RSAT-RemoteAccess"
-      Ensure = "Present"
-    }
+
 	WindowsFeature WebAppProxy
     {
       Name = "Web-Application-Proxy"

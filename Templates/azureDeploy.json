@@ -153,13 +153,22 @@
       {
         "name": "[variables('adSubnetName')]",
         "properties": {
-          "addressprefix": "[parameters('adSubnetAddressRange')]"
+          "addressprefix": "[parameters('adSubnetAddressRange')]",
+          "networkSecurityGroup": {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('adNSGName'))]"
+          }
+
         }
       },
       {
         "name": "[variables('adfsSubnetName')]",
         "properties": {
-          "addressprefix": "[parameters('adfsSubnetAddressRange')]"
+          "addressprefix": "[parameters('adfsSubnetAddressRange')]",
+          "networkSecurityGroup": {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('adfsNSGName'))]"
+          }
+
+
         }
       },
       {
