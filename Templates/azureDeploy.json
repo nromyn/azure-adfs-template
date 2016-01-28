@@ -227,7 +227,7 @@
     "wapLoadBalancerID": "[resourceId('Microsoft.Network/loadBalancers',variables('wapLoadBalancerName'))]",
     "wapLoadBalancerName": "WAP-LB",
     "wapVMName": "[toupper(concat(parameters('companyNamePrefix'), parameters('wapVMNameSuffix')))]",
-    "gatewayPublicIPDNSName": "[tolower(concat(parameters('companyNamePrefix'),'-localVPN'))]"
+    "gatewayPublicIPName": "[tolower(concat(parameters('companyNamePrefix'),'-localVPN'))]"
 
   },
 
