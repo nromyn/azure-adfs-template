@@ -14,11 +14,7 @@
       "defaultValue": "DC",
       "metadata": { "description": "The suffix of the DC: <COMPANYNAMEPREFIX> + -ADDCNAMESUFFIX + index" }
     },
-    "adfsSubnetAddressRange": {
-      "type": "string",
-      "metadata": { "description": "The address range of the desired subnet for the adfs network" },
-      "defaultValue": "10.0.2.0/24"
-    },
+
     "adfsVMNameSuffix": {
       "type": "string",
       "defaultValue": "adfs",
@@ -41,11 +37,7 @@
         "description": "Admin username"
       }
     },
-    "adSubnetAddressRange": {
-      "type": "string",
-      "metadata": { "description": "The address range of the desired subnet for Active Directory" },
-      "defaultValue": "10.0.1.0/25"
-    },
+
     "assetLocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/nromyn/azure-adfs-template/master/"
@@ -55,11 +47,7 @@
       "defaultValue": "Contoso",
       "metadata": { "description": "This is used to prefix the names of the resources created" }
     },
-    "dmzSubnetAddressRange": {
-      "type": "string",
-      "metadata": { "description": "The address range of the desired subnet for the DMZ" },
-      "defaultValue": "10.0.3.0/24"
-    },
+
     "ilbIP": {
       "type": "string",
       "defaultValue": "10.0.2.10",
@@ -109,13 +97,7 @@
       "defaultValue": "nromadfsstor",
       "metadata": { "description": "Storage account name" }
     },
-    "virtualNetworkAddressRange": {
-      "type": "string",
-      "metadata": {
-        "description": "The address range of the new VNET in CIDR format"
-      },
-      "defaultValue": "10.0.0.0/16"
-    },
+
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_D1",
@@ -130,12 +112,34 @@
         "description": "Prefix to use for WAP VM Name"
       }
     },
+    "virtualNetworkAddressRange": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the new VNET in CIDR format"
+      },
+      "defaultValue": "10.0.0.0/16"
+    },
+    "adSubnetAddressRange": {
+      "type": "string",
+      "metadata": { "description": "The address range of the desired subnet for Active Directory" },
+      "defaultValue": "10.0.1.0/25"
+    },
     "gatewaySubnetAddressRange": {
       "type": "string",
-      "defaultValue": "10.0.1.249/29",
+      "defaultValue": "10.0.1.248/29",
       "metadata": {
         "description": "Address space used by the Gateway Subnet"
       }
+    },
+    "adfsSubnetAddressRange": {
+      "type": "string",
+      "metadata": { "description": "The address range of the desired subnet for the adfs network" },
+      "defaultValue": "10.0.2.0/24"
+    },
+    "dmzSubnetAddressRange": {
+      "type": "string",
+      "metadata": { "description": "The address range of the desired subnet for the DMZ" },
+      "defaultValue": "10.0.3.0/24"
     },
     "localGatewayName": {
       "type": "string",
