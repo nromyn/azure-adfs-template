@@ -275,30 +275,6 @@
     },
     {
       "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/loadBalancers/inboundNatRules",
-      "name": "[concat(parameters('wapLoadBalancerName'), '/', 'RDP-VM', copyIndex())]",
-      "location": "[parameters('location')]",
-      "tags": { "displayName": "inboundNATRuleRDP" },
-      "copy": {
-        "name": "lbNatLoop",
-        "count": "[parameters('numberOfVMInstances')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/loadBalancers',parameters('adfsLoadBalancerName'))]",
-      ],
-      "properties": {
-        "backendPort": 3389,
-        "backendAddressPools": { "name": "ADFSLBBE" },
-        "enableFloatingIP": false,
-        "frontendIPConfiguration": {
-          "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/frontendIpConfigurations/adfssLBFE')]"
-        },
-        "frontendPort": "[copyIndex(5000)]",
-        "protocol": "tcp"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat('adfs-',parameters('NetworkInterfaceName'), copyindex())]",
       "location": "[parameters('location')]",
@@ -315,11 +291,6 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/inboundNatRules/RDP-VM', copyindex())]"
-                }
-              ],
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('adfsLoadBalancerName')), '/backendAddressPools/ADFSLBBE')]"

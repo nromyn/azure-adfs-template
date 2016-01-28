@@ -225,20 +225,6 @@
       }
     },
     {
-
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('rdpIPAddressDNSName')]",
-      "location": "[parameters('location')]",
-      "tags": { "displayName": "RDPIPAddress" },
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('rdpIPAddressDNSName')]"
-        }
-      }
-    },
-    {
       "name": "adVMs",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
