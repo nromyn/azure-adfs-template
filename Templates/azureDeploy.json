@@ -139,7 +139,7 @@
     },
     "localGatewayName": {
       "type": "string",
-      "defaultValue": "On-Prem VPN",
+      "defaultValue": "On-Prem-VPN",
       "metadata": {
         "description": "Name of the local VPN (arbitrary)"
       }
