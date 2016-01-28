@@ -316,7 +316,7 @@
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat('wap-',parameters('NetworkInterfaceName'), copyindex())]",
       "location": "[parameters('location')]",
-      "tags": { "displayName": "dmzNICs" },
+      "tags": { "displayName": "wapNICs" },
       "copy": {
         "name": "nicLoop",
         "count": "[parameters('numberofVMInstances')]"
@@ -342,7 +342,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceID('Microsoft.Network/NetworkSecurityGroup/networkSecurityGroups',parameters('dmzNSGName'))]"
+          "id": "[resourceID('Microsoft.Network/NetworkSecurityGroup','/networkSecurityGroups/',parameters('dmzNSGName'))]"
         }
 
       }
