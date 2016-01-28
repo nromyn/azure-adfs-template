@@ -307,8 +307,7 @@
               }
             }
           }
-        ],
-        "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('adfsNSGName'))]" }
+        ]
       }
     },
     {
@@ -340,11 +339,7 @@
               ]
             }
           }
-        ],
-        "networkSecurityGroup": {
-          "id": "[resourceID('Microsoft.Network/NetworkSecurityGroup','/networkSecurityGroups/',parameters('dmzNSGName'))]"
-        }
-
+        ]
       }
       },
     {

@@ -174,7 +174,11 @@
       {
         "name": "[variables('dmzSubnetName')]",
         "properties": {
-          "addressprefix": "[parameters('dmzSubnetAddressRange')]"
+          "addressprefix": "[parameters('dmzSubnetAddressRange')]",
+          "networkSecurityGroup": {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('DMZNSGName'))]"
+          }
+
         }
       }
     ],
