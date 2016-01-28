@@ -84,7 +84,8 @@
       "type": "string",
       "metadata": {
         "description": "Shared key (PSK) for IPSec tunnel"
-      }
+      },
+      "defaultValue": "YouShouldGenerateANewKey"
     },
     "gatewayName": {
       "type": "string",
@@ -271,7 +272,6 @@
               "direction": "Inbound"
             }
           },
-
           {
             "name": "allow_AD_LDAPS",
             "properties": {
@@ -694,7 +694,6 @@
       "name": "[parameters('localGatewayName')]",
       "location": "[parameters('location')]",
       "tags": { "displayName": "localGateway" },
-      "comments": "",
       "properties": {
         "localNetworkAddressSpace": {
           "addressPrefixes": [

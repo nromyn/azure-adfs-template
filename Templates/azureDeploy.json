@@ -2,6 +2,13 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "sharedKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Shared key (PSK) for IPSec tunnel"
+      },
+      "defaultValue": "YouShouldGenerateANewKey"
+    },
     "addcVMNameSuffix": {
       "type": "string",
       "defaultValue": "DC",
@@ -262,7 +269,8 @@
           "localGatewayIPAddress": { "value": "[parameters('localGatewayIPAddress')]" },
           "localAddressPRefix": { "value": "[parameters('localAddressPrefix')]" },
           "connectionName": { "value": "[variables('connectionName')]" },
-          "gatewayPublicIPName": { "value": "[variables('gatewayPublicIPName')]" }
+          "gatewayPublicIPName": { "value": "[variables('gatewayPublicIPName')]" },
+          "sharedKey": {"value": "[parameters('sharedKey')]"}
         }
       }
     },
