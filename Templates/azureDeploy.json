@@ -278,6 +278,8 @@
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "assetlocation": { "value": "[parameters('assetLocation')]" },
           "dmzSubnetName": { "value": "[variables('dmzSubnetName')]" },
+          "dmzNSGName": { "value": "[variables('dmzNSGName')]" },
+          "adfsNSGName": { "value": "[variables('adfsNSGName')]" },
           "ilbIP": { "value": "[parameters('ilbIP')]" },
           "location": { "value": "[parameters('location')]" },
           "networkInterfaceName": { "value": "[parameters('NetworkInterfaceName')]" },

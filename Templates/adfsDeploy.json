@@ -15,6 +15,10 @@
       "type": "string",
       "defaultValue": "INT-ADFS"
     },
+    "dmzNSGName": {
+      "type": "string",
+      "defaultValue": "DMZ-WAP"
+    },
     "adfsSubnetName": {
       "type": "string",
       "defaultValue": "adSubnet"
@@ -338,7 +342,7 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceID('Microsoft.Network/NetworkSecurityGroup/networkSecurityGroups,variables('dmzNSGName')]"
+          "id": "[resourceID('Microsoft.Network/NetworkSecurityGroup/networkSecurityGroups',parameters('dmzNSGName'))]"
         }
 
       }
