@@ -51,6 +51,65 @@
     "ilbIP": {
       "type": "string",
       "metadata": { "description": "IP address of the internal Load Balancer" }
+    },
+    "localGatewayName": {
+      "type": "string",
+      "defaultValue": "localGateway",
+      "metadata": {
+        "description": "Aribtary name for gateway resource representing "
+      }
+    },
+    "localGatewayIpAddress": {
+      "type": "string",
+      "defaultValue": "1.1.1.1",
+      "metadata": {
+        "description": "Public IP of your StrongSwan Instance"
+      }
+    },
+    "localAddressPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/16",
+      "metadata": {
+        "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet"
+      }
+    },
+    "connectionName": {
+      "type": "string",
+      "defaultValue": "Azure2Other",
+      "metadata": {
+        "description": "Arbitrary name for the new connection between Azure VNet and other network"
+      }
+    },
+    "sharedKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Shared key (PSK) for IPSec tunnel"
+      }
+    },
+    "gatewayName": {
+      "type": "string",
+      "defaultValue": "azureGateway",
+      "metadata": {
+        "description": "Arbitrary name for the new gateway"
+      }
+    },
+    "gatewayPublicIPName": {
+      "type": "string",
+      "defaultValue": "azureGatewayIP",
+      "metadata": {
+        "description": "Aribtary name for public IP resource used for the new azure gateway"
+      }
+    },
+    "vpnType": {
+      "type": "string",
+      "metadata": {
+        "description": "Route based or policy based"
+      },
+      "defaultValue": "PolicyBased",
+      "allowedValues": [
+        "RouteBased",
+        "PolicyBased"
+      ]
     }
   },
   "variables": {
@@ -60,11 +119,13 @@
     "adSubnetName": "adSubnet",
     "adfsSubnetName": "adfsSubnet",
     "dmzSubnetName": "dmzSubnet",
+    "gatewaySubnetName": "gatewaySubnet",
     "adsubnetrange": "[parameters('subnets')[0].properties.addressPrefix]",
     "adfsSubnetRange": "[parameters('subnets')[1].properties.addressPrefix]",
     "dmzSubnetRange": "[parameters('subnets')[2].properties.addressPrefix]",
     "adfsSubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('adfsSubnetName'))]",
     "dmzSubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('dmzSubnetName'))]",
+    "gatewaySubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('gatewaySubnetName'))]",
     "adSubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('adSubnetName'))]",
     "dhcpIPs": [ "10.0.1.4", "10.0.1.5" ],
     "virtualNetworkName": "[concat(parameters('companyNamePrefix'), '-vnet')]",
@@ -625,6 +686,84 @@
         },
 
         "subnets": "[parameters('subnets')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/localNetworkGateways",
+      "name": "[parameters('localGatewayName')]",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "localGateway" },
+      "comments": "",
+      "properties": {
+        "localNetworkAddressSpace": {
+          "addressPrefixes": [
+            "[parameters('localAddressPrefix')]"
+          ]
+        },
+        "gatewayIpAddress": "[parameters('localGatewayIpAddress')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "name": "[parameters('connectionName')]",
+      "type": "Microsoft.Network/connections",
+      "location": "[parameters('location')]",
+      "tags": { "displayName": "vpnConnection" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworkGateways/', parameters('gatewayName'))]",
+        "[concat('Microsoft.Network/localNetworkGateways/', parameters('localGatewayName'))]"
+      ],
+      "properties": {
+        "virtualNetworkGateway1": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName'))]"
+        },
+        "localNetworkGateway2": {
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
+        },
+        "connectionType": "IPsec",
+        "routingWeight": 10,
+        "sharedKey": "[parameters('sharedKey')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[parameters('gatewayPublicIPName')]",
+      "location": "[parameters('location')]",
+      "tags": {"displayName": "gatewayPublicIP"},
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "name": "[parameters('gatewayName')]",
+      "location": "[parameters('location')]",
+      "tags": {"displayName": "gateway"},
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('gatewayPublicIPName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('gatewaySubnetID')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('gatewayPublicIPName'))]"
+              }
+            },
+            "name": "vnetGatewayConfig"
+          }
+        ],
+        "gatewayType": "Vpn",
+        "vpnType": "[parameters('vpnType')]",
+        "enableBgp": "false"
       }
     }
   ]

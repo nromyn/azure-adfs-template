@@ -37,7 +37,7 @@
     "adSubnetAddressRange": {
       "type": "string",
       "metadata": { "description": "The address range of the desired subnet for Active Directory" },
-      "defaultValue": "10.0.1.0/24"
+      "defaultValue": "10.0.1.0/25"
     },
     "assetLocation": {
       "type": "string",
@@ -122,8 +122,41 @@
       "metadata": {
         "description": "Prefix to use for WAP VM Name"
       }
-    }
-  },
+    },
+    "gatewaySubnetAddressRange": {
+      "type": "string",
+      "defaultValue": "10.0.1.249/29",
+      "metadata": {
+        "description": "Address space used by the Gateway Subnet"
+      }
+      },
+    "localGatewayName": {
+      "type": "string",
+      "defaultValue": "On-Prem VPN",
+      "metadata": {
+        "description": "Name of the local VPN (arbitrary)"
+      }
+      },
+    "localGatewayIPAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "IP Address of the on-premises VPN Appliance"
+      }
+      },
+    "localAddressPRefix": {
+      "metadata": {
+        "description": "Address Prefix of the local network",
+        "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ]
+
+      },
+        "type": "string"
+      },
+    "gatewayPublicIPName": {
+      "type": "string",
+      "metadata": { "description": "public IP Address DNS Name for the Gateway" }
+      }
+
+    },
   "variables": {
     "adAvailabilitySetName": "adAvSet",
     "adfsAvailabilitySetName": "adfsAvSet",
@@ -142,10 +175,12 @@
     "dmzNSGName": "DMZ-WAP",
     "dmzSubnetID": "[concat(variables('vnetID'),'/subnets/',variables('dmzSubnetName'))]",
     "dmzSubnetName": "dmzSubnet",
+    "gatewaySubnetName": "gatewaySubnet",
     "imageOffer": "WindowsServer",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageSKU": "2012-R2-Datacenter",
     "publicIPAddressDNSName": "[tolower(concat(parameters('companyNamePrefix'),'-adfs'))]",
+    "connectionName": "[tolower(concat(parameters('companyNamePrefix'),'-VPN'))]",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressDNSname'))]",
     "rdpIPAddressDNSName": "[tolower(concat(parameters('companyNamePrefix'),'-adfs-rdp'))]",
     "storageAccountType": "Standard_GRS",
@@ -178,7 +213,12 @@
           "networkSecurityGroup": {
             "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('DMZNSGName'))]"
           }
-
+        }
+      },
+      {
+        "name": "[variables('gatewaySubnetName')]",
+        "properties": {
+          "addressprefix": "[parameters('gatewaySubnetAddressRange')]"
         }
       }
     ],
@@ -219,7 +259,12 @@
           "subnets": { "value": "[ variables('subnets') ]" },
           "virtualNetworkAddressRange": { "value": "[parameters('virtualNetworkAddressRange')]" },
           "onPremDNSIP": { "value": "[parameters('onPremDNSIP')]" },
-          "ilbIP": { "value": "[parameters('ilbIP')]" }
+          "ilbIP": { "value": "[parameters('ilbIP')]" },
+          "localGatewayName": { "value": "[parameters('localGatewayName')]" },
+          "localGatewayIPAddress": { "value": "[parameters('localGatewayIP')]" },
+          "localAddressPRefix": { "value": "[parameters('localAddressPrefix')]" },
+          "connectionName": { "value": "[variables('connectionName')]" },
+          "gatewayPublicIPName": { "value": "[variables('gatewayPublicIPName')]" }
         }
       }
     },
@@ -305,6 +350,7 @@
         "Microsoft.Resources/deployments/adVMs",
         "Microsoft.Resources/deployments/adfsVMs"
       ],
+      "comments": "Sets the virtual "
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('vnetDNSTemplateURI')]" },
@@ -314,7 +360,7 @@
           "subnets": { "value": "[ variables('subnets') ]" },
           "virtualNetworkAddressRange": { "value": "[parameters('virtualNetworkAddressRange')]" },
           "onPremDNSIP": { "value": "[parameters('onPremDNSIP')]" },
-          "ilbIP": { "value": "[parameters('ilbIP')]" }
+          "ilbIP": { "value": "[parameters('ilbIP')]" },
         }
       }
     }
