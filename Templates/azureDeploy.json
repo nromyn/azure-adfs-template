@@ -226,7 +226,9 @@
     "wapAvailabilitySetName": "wapAvSet",
     "wapLoadBalancerID": "[resourceId('Microsoft.Network/loadBalancers',variables('wapLoadBalancerName'))]",
     "wapLoadBalancerName": "WAP-LB",
-    "wapVMName": "[toupper(concat(parameters('companyNamePrefix'), parameters('wapVMNameSuffix')))]"
+    "wapVMName": "[toupper(concat(parameters('companyNamePrefix'), parameters('wapVMNameSuffix')))]",
+    "gatewayPublicIPDNSName": "[tolower(concat(parameters('companyNamePrefix'),'-localVPN'))]"
+
   },
 
   "resources": [
@@ -257,7 +259,7 @@
           "onPremDNSIP": { "value": "[parameters('onPremDNSIP')]" },
           "ilbIP": { "value": "[parameters('ilbIP')]" },
           "localGatewayName": { "value": "[parameters('localGatewayName')]" },
-          "localGatewayIPAddress": { "value": "[parameters('localGatewayIP')]" },
+          "localGatewayIPAddress": { "value": "[parameters('localGatewayIPAddress')]" },
           "localAddressPRefix": { "value": "[parameters('localAddressPrefix')]" },
           "connectionName": { "value": "[variables('connectionName')]" },
           "gatewayPublicIPName": { "value": "[variables('gatewayPublicIPName')]" }
