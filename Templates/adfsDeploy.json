@@ -171,10 +171,7 @@
             "name": "ADFSLBFE",
             "properties": {
               "privateIPAddress": "[parameters('ilbIP')]",
-              "privateIPAllocationMethod": "Static",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('rdpIPAddressDNSname'))]"
-              }
+              "privateIPAllocationMethod": "Static"
             }
           }
         ],
