@@ -129,34 +129,30 @@
       "metadata": {
         "description": "Address space used by the Gateway Subnet"
       }
-      },
+    },
     "localGatewayName": {
       "type": "string",
       "defaultValue": "On-Prem VPN",
       "metadata": {
         "description": "Name of the local VPN (arbitrary)"
       }
-      },
+    },
     "localGatewayIPAddress": {
       "type": "string",
       "metadata": {
         "description": "IP Address of the on-premises VPN Appliance"
       }
-      },
+    },
     "localAddressPRefix": {
       "metadata": {
         "description": "Address Prefix of the local network",
         "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ]
 
       },
-        "type": "string"
-      },
-    "gatewayPublicIPName": {
-      "type": "string",
-      "metadata": { "description": "public IP Address DNS Name for the Gateway" }
-      }
+      "type": "string"
+    }
 
-    },
+  },
   "variables": {
     "adAvailabilitySetName": "adAvSet",
     "adfsAvailabilitySetName": "adfsAvSet",
@@ -341,28 +337,7 @@
           "wapVMName": { "value": "[variables('wapVMName')]" }
         }
       }
-    },
-    {
-      "name": "virtualNetworkDNS",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/adVMs",
-        "Microsoft.Resources/deployments/adfsVMs"
-      ],
-      "comments": "Sets the virtual "
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('vnetDNSTemplateURI')]" },
-        "parameters": {
-          "location": { "value": "[parameters('location')]" },
-          "companyNamePrefix": { "value": "[parameters('companyNamePrefix')]" },
-          "subnets": { "value": "[ variables('subnets') ]" },
-          "virtualNetworkAddressRange": { "value": "[parameters('virtualNetworkAddressRange')]" },
-          "onPremDNSIP": { "value": "[parameters('onPremDNSIP')]" },
-          "ilbIP": { "value": "[parameters('ilbIP')]" },
-        }
-      }
     }
+
   ]
 }
