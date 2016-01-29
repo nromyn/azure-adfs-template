@@ -274,7 +274,8 @@
           "localAddressPRefix": { "value": "[parameters('localAddressPrefix')]" },
           "connectionName": { "value": "[variables('connectionName')]" },
           "gatewayPublicIPName": { "value": "[variables('gatewayPublicIPName')]" },
-          "sharedKey": {"value": "[parameters('sharedKey')]"}
+          "sharedKey": { "value": "[parameters('sharedKey')]" },
+          "gatewaySubnetName": {"value": "[variables('gatewaySubnetName')]"}
         }
       }
     },

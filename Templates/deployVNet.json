@@ -111,6 +111,10 @@
         "RouteBased",
         "PolicyBased"
       ]
+    },
+    "gatewaySubnetName": {
+      "type": "string",
+      "defaultValue": "gatewaySubnet"
     }
   },
   "variables": {
@@ -120,13 +124,12 @@
     "adSubnetName": "adSubnet",
     "adfsSubnetName": "adfsSubnet",
     "dmzSubnetName": "dmzSubnet",
-    "gatewaySubnetName": "gatewaySubnet",
     "adsubnetrange": "[parameters('subnets')[0].properties.addressPrefix]",
     "adfsSubnetRange": "[parameters('subnets')[1].properties.addressPrefix]",
     "dmzSubnetRange": "[parameters('subnets')[2].properties.addressPrefix]",
     "adfsSubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('adfsSubnetName'))]",
     "dmzSubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('dmzSubnetName'))]",
-    "gatewaySubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('gatewaySubnetName'))]",
+    "gatewaySubnetId": "[concat(variables('vnetID'),'/subnets/',parameters('gatewaySubnetName'))]",
     "adSubnetId": "[concat(variables('vnetID'),'/subnets/',variables ('adSubnetName'))]",
     "dhcpIPs": [ "10.0.1.4", "10.0.1.5" ],
     "virtualNetworkName": "[concat(parameters('companyNamePrefix'), '-vnet')]",

@@ -2,6 +2,62 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "azureVNetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.3.0.0/16",
+      "metadata": {
+        "description": "CIDR block representing the address space of the Azure VNet"
+      }
+    },
+    "connectionName": {
+      "type": "string",
+      "defaultValue": "Azure2Other",
+      "metadata": {
+        "description": "Arbitrary name for the new connection between Azure VNet and other network"
+      }
+    },
+    "gatewayName": {
+      "type": "string",
+      "defaultValue": "azureGateway",
+      "metadata": {
+        "description": "Arbitrary name for the new gateway"
+      }
+    },
+    "gatewayPublicIPName": {
+      "type": "string",
+      "defaultValue": "azureGatewayIP",
+      "metadata": {
+        "description": "Aribtary name for public IP resource used for the new azure gateway"
+      }
+    },
+    "gatewaySubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.3.200.0/29",
+      "metadata": {
+        "description": "CIDR block for gateway subnet, subsset of azureVNetAddressPrefix address space"
+      }
+    },
+    "localAddressPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/16",
+      "metadata": {
+        "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet"
+      }
+    },
+    "localGatewayIpAddress": {
+      "type": "string",
+      "defaultValue": "1.1.1.1",
+      "metadata": {
+        "description": "Public IP of your StrongSwan Instance"
+      }
+    },
+    "localGatewayName": {
+      "type": "string",
+      "defaultValue": "localGateway",
+      "metadata": {
+        "description": "Aribtary name for gateway resource representing "
+      }
+    },
     "location": {
       "type": "string",
       "metadata": {
@@ -28,50 +84,10 @@
         "West India"
       ]
     },
-    "vpnType": {
+    "sharedKey": {
       "type": "string",
       "metadata": {
-        "description": "Route based or policy based"
-      },
-      "defaultValue": "RouteBased",
-      "allowedValues": [
-        "RouteBased",
-        "PolicyBased"
-      ]
-    },
-    "localGatewayName": {
-      "type": "string",
-      "defaultValue": "localGateway",
-      "metadata": {
-        "description": "Aribtary name for gateway resource representing "
-      }
-    },
-    "localGatewayIpAddress": {
-      "type": "string",
-      "defaultValue": "1.1.1.1",
-      "metadata": {
-        "description": "Public IP of your StrongSwan Instance"
-      }
-    },
-    "localAddressPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.0.0/16",
-      "metadata": {
-        "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet"
-      }
-    },
-    "virtualNetworkName": {
-      "type": "string",
-      "defaultValue": "azureVnet",
-      "metadata": {
-        "description": "Arbitrary name for the Azure Virtual Network"
-      }
-    },
-    "azureVNetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.3.0.0/16",
-      "metadata": {
-        "description": "CIDR block representing the address space of the Azure VNet"
+        "description": "Shared key (PSK) for IPSec tunnel"
       }
     },
     "subnetName": {
@@ -88,39 +104,23 @@
         "description": "CIDR block for VM subnet, subset of azureVNetAddressPrefix address space"
       }
     },
-    "gatewaySubnetPrefix": {
+    "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "10.3.200.0/29",
+      "defaultValue": "azureVnet",
       "metadata": {
-        "description": "CIDR block for gateway subnet, subsset of azureVNetAddressPrefix address space"
+        "description": "Arbitrary name for the Azure Virtual Network"
       }
     },
-    "gatewayPublicIPName": {
-      "type": "string",
-      "defaultValue": "azureGatewayIP",
-      "metadata": {
-        "description": "Aribtary name for public IP resource used for the new azure gateway"
-      }
-    },
-    "gatewayName": {
-      "type": "string",
-      "defaultValue": "azureGateway",
-      "metadata": {
-        "description": "Arbitrary name for the new gateway"
-      }
-    },
-    "connectionName": {
-      "type": "string",
-      "defaultValue": "Azure2Other",
-      "metadata": {
-        "description": "Arbitrary name for the new connection between Azure VNet and other network"
-      }
-    },
-    "sharedKey": {
+    "vpnType": {
       "type": "string",
       "metadata": {
-        "description": "Shared key (PSK) for IPSec tunnel"
-      }
+        "description": "Route based or policy based"
+      },
+      "defaultValue": "RouteBased",
+      "allowedValues": [
+        "RouteBased",
+        "PolicyBased"
+      ]
     }
   },
   "variables": {
