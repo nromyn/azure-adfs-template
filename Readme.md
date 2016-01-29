@@ -33,7 +33,12 @@
 * There are no RDP Endpoints created on the VMs. If you cannot access the VPNs using the VPN created with the deployment, you'll have to add a Public IP to one of the ADFS or AD VMs and take it from there.
 * Domain Join, ADFS farm join/creation, and WAP farm join are not supported
 * I haven't actually tested the VPN capability!
-
+* T-shirt sizing - ability to select from:
+   * non-redundant (i.e. service only to be utilized if primary on-site server goes down)
+   * redundant (as-built)
+   * geo-redundant (deploy twice; load balance with Traffic Manager)
+   * non-redundant, geo-load balanced
+ 
 ##Known Issues
 
 * DSC to install the Windows Application Proxy Role will fail, causing the template deployment to fail. This warning can be ignored, but the WAP role will need to be manually installed
