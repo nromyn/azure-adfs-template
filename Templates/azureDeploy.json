@@ -2,56 +2,9 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "sharedKey": {
-      "type": "string",
-      "metadata": {
-        "description": "Shared key (PSK) for IPSec tunnel"
-      },
-      "defaultValue": "YouShouldGenerateANewKey"
-    },
-    "addcVMNameSuffix": {
-      "type": "string",
-      "defaultValue": "DC",
-      "metadata": { "description": "The suffix of the DC: <COMPANYNAMEPREFIX> + -ADDCNAMESUFFIX + index" }
-    },
-
-    "adfsVMNameSuffix": {
-      "type": "string",
-      "defaultValue": "adfs",
-      "metadata": { "description": "Prefix to use for ADFS VM name" }
-    },
-    "adIPs": {
-      "type": "array",
-      "metadata": { "description": "The IP Addresses assigned to the domain controllers (a, b). Remember the first IP in a subnet is .4 e.g. 10.0.0.0/16 reserves 10.0.0.0-3. Specify one IP per server - must match numberofVMInstances or deployment will fail.s" },
-      "defaultValue": [ "10.0.1.4", "10.0.1.5" ]
-    },
-    "adminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Admin password"
-      }
-    },
-    "adminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Admin username"
-      }
-    },
-
     "assetLocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/nromyn/azure-adfs-template/master/"
-    },
-    "companyNamePrefix": {
-      "type": "string",
-      "defaultValue": "Contoso",
-      "metadata": { "description": "This is used to prefix the names of the resources created" }
-    },
-
-    "ilbIP": {
-      "type": "string",
-      "defaultValue": "10.0.2.10",
-      "metadata": { "description": "The IP used for the ADFS Load Balancer (Internal)" }
     },
     "location": {
       "type": "string",
@@ -77,27 +30,51 @@
       ],
       "metadata": { "description": "The region to deploy the resources into" }
     },
-    "networkInterfaceName": {
+    "adminUsername": {
       "type": "string",
-      "metadata": { "description": "This is the prefix name of the Network interfaces" },
-      "defaultValue": "NIC"
+      "metadata": {
+        "description": "Admin username"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Admin password"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "nromadfsstor",
+      "metadata": { "description": "the name of the storage account into which the VMs will be deployed" }
+    },
+    "companyNamePrefix": {
+      "type": "string",
+      "defaultValue": "Contoso",
+      "metadata": { "description": "This is used to prefix the names of the resources created" }
+    },
+    "addcVMNameSuffix": {
+      "type": "string",
+      "defaultValue": "DC",
+      "metadata": { "description": "The suffix of the DC: <COMPANYNAMEPREFIX> + -ADDCNAMESUFFIX + index" }
+    },
+
+    "adfsVMNameSuffix": {
+      "type": "string",
+      "defaultValue": "adfs",
+      "metadata": { "description": "Prefix to use for ADFS VM name" }
+    },
+    "wapVMNameSuffix": {
+      "type": "string",
+      "defaultValue": "proxy",
+      "metadata": {
+        "description": "Prefix to use for WAP VM Name"
+      }
     },
     "numberofVMInstances": {
       "type": "int",
       "defaultValue": 2,
       "metadata": { "description": "The number of ADFS and WAP VMs to build" }
     },
-    "onPremDNSIP": {
-      "type": "string",
-      "metadata": { "description": "The address of a domain controller on-premises" },
-      "defaultValue": "192.168.32.10/24"
-    },
-    "storageAccountName": {
-      "type": "string",
-      "defaultValue": "nromadfsstor",
-      "metadata": { "description": "Storage account name" }
-    },
-
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_D1",
@@ -105,11 +82,38 @@
         "description": "This is the allowed list of VM sizes"
       }
     },
-    "wapVMNameSuffix": {
+    "networkInterfaceName": {
       "type": "string",
-      "defaultValue": "proxy",
+      "metadata": { "description": "This is the prefix name of the Network interfaces" },
+      "defaultValue": "NIC"
+    },
+    "adIPs": {
+      "type": "array",
+      "metadata": { "description": "The IP Addresses assigned to the domain controllers (a, b). Remember the first IP in a subnet is .4 e.g. 10.0.0.0/16 reserves 10.0.0.0-3. Specify one IP per server - must match numberofVMInstances or deployment will fail.s" },
+      "defaultValue": [ "10.0.1.4", "10.0.1.5" ]
+    },
+    "ilbIP": {
+      "type": "string",
+      "defaultValue": "10.0.2.10",
+      "metadata": { "description": "The IP used for the ADFS Load Balancer (Internal)" }
+    },
+    "onPremDNSIP": {
+      "type": "string",
+      "metadata": { "description": "The address of a domain controller on-premises" },
+      "defaultValue": "192.168.32.10/24"
+    },
+    "localAddressPRefix": {
       "metadata": {
-        "description": "Prefix to use for WAP VM Name"
+        "description": "Address Prefix of the local network",
+        "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ]
+
+      },
+      "type": "string"
+    },
+    "localGatewayIPAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "IP Address of the on-premises VPN Appliance"
       }
     },
     "virtualNetworkAddressRange": {
@@ -148,19 +152,14 @@
         "description": "Name of the local VPN (arbitrary)"
       }
     },
-    "localGatewayIPAddress": {
+
+
+    "sharedKey": {
       "type": "string",
       "metadata": {
-        "description": "IP Address of the on-premises VPN Appliance"
-      }
-    },
-    "localAddressPRefix": {
-      "metadata": {
-        "description": "Address Prefix of the local network",
-        "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ]
-
+        "description": "Shared key (PSK) for IPSec tunnel"
       },
-      "type": "string"
+      "defaultValue": "YouShouldGenerateANewKey"
     }
 
   },
@@ -275,7 +274,7 @@
           "connectionName": { "value": "[variables('connectionName')]" },
           "gatewayPublicIPName": { "value": "[variables('gatewayPublicIPName')]" },
           "sharedKey": { "value": "[parameters('sharedKey')]" },
-          "gatewaySubnetName": {"value": "[variables('gatewaySubnetName')]"}
+          "gatewaySubnetName": { "value": "[variables('gatewaySubnetName')]" }
         }
       }
     },

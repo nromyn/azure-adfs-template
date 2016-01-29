@@ -47,7 +47,52 @@
       "metadata": { "description": "The address of a domain controller on-premises" },
       "defaultValue": "192.168.32.10/24"
     },
-    "subnets": { "type": "array" },
+    "subnets": {
+      "type": "array",
+      "defaultValue": [
+        {
+          "name": "adSubnet",
+          "properties": {
+            "addressprefix": "10.0.1.0/25",
+            "networkSecurityGroup": {
+              "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('adNSGName'))]"
+            }
+
+          }
+        },
+        {
+          "name": "adfsSubnet",
+          "properties": {
+            "addressprefix": "10.0.2.0/24",
+            "networkSecurityGroup": {
+              "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('adfsNSGName'))]"
+            }
+
+
+          }
+        },
+        {
+          "name": "dmzSubnet",
+          "properties": {
+            "addressprefix": "10.0.3.0/24",
+            "networkSecurityGroup": {
+              "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('DMZNSGName'))]"
+            }
+          }
+        },
+        {
+          "name": "gatewaySubnet",
+          "properties": {
+            "addressprefix": "10.0.1.248/29"
+          }
+        }
+      ]
+
+    },
+    "gatewaySubnetName": {
+      "type": "string",
+      "defaultValue": "gatewaySubnet"
+    },
     "ilbIP": {
       "type": "string",
       "metadata": { "description": "IP address of the internal Load Balancer" }
@@ -56,51 +101,45 @@
       "type": "string",
       "defaultValue": "localGateway",
       "metadata": {
-        "description": "Aribtary name for gateway resource representing "
+        "description": "Aribtary name for gateway resource representing the on-premise network "
       }
     },
     "localGatewayIpAddress": {
       "type": "string",
       "defaultValue": "1.1.1.1",
       "metadata": {
-        "description": "Public IP of your StrongSwan Instance"
+        "description": "Public IP of your on-premise VPN"
       }
     },
     "localAddressPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.0.0/16",
+      "type": "array",
+      "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ],
       "metadata": {
         "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet"
       }
-    },
-    "connectionName": {
-      "type": "string",
-      "defaultValue": "Azure2Other",
-      "metadata": {
-        "description": "Arbitrary name for the new connection between Azure VNet and other network"
-      }
-    },
-    "sharedKey": {
-      "type": "string",
-      "metadata": {
-        "description": "Shared key (PSK) for IPSec tunnel"
-      },
-      "defaultValue": "YouShouldGenerateANewKey"
     },
     "gatewayName": {
       "type": "string",
       "defaultValue": "azureGateway",
       "metadata": {
-        "description": "Arbitrary name for the new gateway"
+        "description": "Arbitrary name for the new VPN gateway"
       }
     },
     "gatewayPublicIPName": {
       "type": "string",
       "defaultValue": "azureGatewayIP",
       "metadata": {
-        "description": "Aribtary name for public IP resource used for the new azure gateway"
+        "description": "public DNS name for the Azure Gateway Endpoint"
       }
     },
+    "connectionName": {
+      "type": "string",
+      "defaultValue": "AzureToContoso",
+      "metadata": {
+        "description": "Arbitrary name for the new connection between Azure VNet and other network"
+      }
+    },
+
     "vpnType": {
       "type": "string",
       "metadata": {
@@ -112,10 +151,18 @@
         "PolicyBased"
       ]
     },
-    "gatewaySubnetName": {
+
+    "sharedKey": {
       "type": "string",
-      "defaultValue": "gatewaySubnet"
+      "metadata": {
+        "description": "Shared key (PSK) for IPSec tunnel"
+      },
+      "defaultValue": "YouShouldGenerateANewKey"
     }
+
+
+
+
   },
   "variables": {
     "adNSGName": "INT-AD",
@@ -733,7 +780,7 @@
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[parameters('gatewayPublicIPName')]",
       "location": "[parameters('location')]",
-      "tags": {"displayName": "gatewayPublicIP"},
+      "tags": { "displayName": "gatewayPublicIP" },
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
       }
@@ -743,7 +790,7 @@
       "type": "Microsoft.Network/virtualNetworkGateways",
       "name": "[parameters('gatewayName')]",
       "location": "[parameters('location')]",
-      "tags": {"displayName": "gateway"},
+      "tags": { "displayName": "gateway" },
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', parameters('gatewayPublicIPName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
