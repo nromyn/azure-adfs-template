@@ -4,7 +4,8 @@
   "parameters": {
     "assetLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/nromyn/azure-adfs-template/master/"
+      "defaultValue": "https://raw.githubusercontent.com/nromyn/azure-adfs-template/master/",
+      "metadata": {"description": "This is the location in which all the linked templates are stored."}
     },
     "location": {
       "type": "string",
@@ -32,25 +33,26 @@
     },
     "adminUsername": {
       "type": "string",
+      "defaultValue": "localAdmin"
       "metadata": {
-        "description": "Admin username"
+        "description": "Username to set for the local User. Cannot be \"Administrator\", \"root\" and possibly other such common account names. "
       }
     },
     "adminPassword": {
       "type": "securestring",
       "metadata": {
-        "description": "Admin password"
+        "description": "Password for the local administrator account. Cannot be \"P@ssw0rd\" and possibly other such common passwords. Must be 8 characters long and three of the following complexity requirements: uppercase, lowercase, number, special character"
       }
     },
     "storageAccountName": {
       "type": "string",
       "defaultValue": "nromadfsstor",
-      "metadata": { "description": "the name of the storage account into which the VMs will be deployed" }
+      "metadata": { "description": "The name of the storage account into which the VMs will be deployed" }
     },
     "companyNamePrefix": {
       "type": "string",
       "defaultValue": "Contoso",
-      "metadata": { "description": "This is used to prefix the names of the resources created" }
+      "metadata": { "description": "This is used to prefix the names of the resources created." }
     },
     "addcVMNameSuffix": {
       "type": "string",
@@ -61,13 +63,13 @@
     "adfsVMNameSuffix": {
       "type": "string",
       "defaultValue": "adfs",
-      "metadata": { "description": "Prefix to use for ADFS VM name" }
+      "metadata": { "description": "Suffix to use for ADFS VM name" }
     },
     "wapVMNameSuffix": {
       "type": "string",
       "defaultValue": "proxy",
       "metadata": {
-        "description": "Prefix to use for WAP VM Name"
+        "description": "Suffix to use for WAP VM Name"
       }
     },
     "numberofVMInstances": {
@@ -79,17 +81,17 @@
       "type": "string",
       "defaultValue": "Standard_D1",
       "metadata": {
-        "description": "This is the allowed list of VM sizes"
+        "description": "Select a VM SKU"
       }
     },
     "networkInterfaceName": {
       "type": "string",
-      "metadata": { "description": "This is the prefix name of the Network interfaces" },
+      "metadata": { "description": "This is the name of the Network interfaces." },
       "defaultValue": "NIC"
     },
     "adIPs": {
       "type": "array",
-      "metadata": { "description": "The IP Addresses assigned to the domain controllers (a, b). Remember the first IP in a subnet is .4 e.g. 10.0.0.0/16 reserves 10.0.0.0-3. Specify one IP per server - must match numberofVMInstances or deployment will fail.s" },
+      "metadata": { "description": "The IP Addresses assigned to the domain controllers (a, b). Remember the first IP in a subnet is .4 e.g. 10.0.0.0/16 reserves 10.0.0.0-3. Specify one IP per server - must match numberofVMInstances or deployment will fail." },
       "defaultValue": [ "10.0.1.4", "10.0.1.5" ]
     },
     "ilbIP": {
@@ -100,15 +102,14 @@
     "onPremDNSIP": {
       "type": "string",
       "metadata": { "description": "The address of a domain controller on-premises" },
-      "defaultValue": "192.168.32.10/24"
+      "defaultValue": "192.168.32.10"
     },
     "localAddressPRefix": {
       "metadata": {
-        "description": "Address Prefix of the local network",
+        "description": "Address Prefix of the on-premises network",
         "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ]
-
       },
-      "type": "string"
+      "type": "array"
     },
     "localGatewayIPAddress": {
       "type": "string",
@@ -119,49 +120,46 @@
     "virtualNetworkAddressRange": {
       "type": "string",
       "metadata": {
-        "description": "The address range of the new VNET in CIDR format"
+        "description": "The address range of the new virtual network in CIDR format"
       },
       "defaultValue": "10.0.0.0/16"
     },
     "adSubnetAddressRange": {
       "type": "string",
-      "metadata": { "description": "The address range of the desired subnet for Active Directory" },
+      "metadata": { "description": "The address range of the desired subnet for Active Directory." },
       "defaultValue": "10.0.1.0/25"
     },
     "gatewaySubnetAddressRange": {
       "type": "string",
       "defaultValue": "10.0.1.248/29",
       "metadata": {
-        "description": "Address space used by the Gateway Subnet"
+        "description": "Address space used by the VPN Gateway. It must be larger than a /29; it is recommended to keep it at /29 as you can't deploy into it"
       }
     },
     "adfsSubnetAddressRange": {
       "type": "string",
-      "metadata": { "description": "The address range of the desired subnet for the adfs network" },
+      "metadata": { "description": "The address range of the desired subnet for the ADFS Servers." },
       "defaultValue": "10.0.2.0/24"
     },
     "dmzSubnetAddressRange": {
       "type": "string",
-      "metadata": { "description": "The address range of the desired subnet for the DMZ" },
+      "metadata": { "description": "The address range of the desired subnet for the DMZ." },
       "defaultValue": "10.0.3.0/24"
     },
     "localGatewayName": {
       "type": "string",
       "defaultValue": "On-Prem-VPN",
       "metadata": {
-        "description": "Name of the local VPN (arbitrary)"
+        "description": "Arbitrary name for the gateway representing the on-premises network"
       }
     },
-
-
     "sharedKey": {
       "type": "string",
       "metadata": {
-        "description": "Shared key (PSK) for IPSec tunnel"
+        "description": "Arbitrary Shared key (PSK) for IPSec tunnel"
       },
       "defaultValue": "YouShouldGenerateANewKey"
     }
-
   },
   "variables": {
     "adAvailabilitySetName": "adAvSet",

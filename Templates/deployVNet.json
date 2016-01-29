@@ -25,7 +25,7 @@
         "West India"
       ],
       "metadata": {
-        "Description": "The region to deploy the resources into"
+        "Description": "The region into which all resources will be deployed."
       }
     },
     "companyNamePrefix": {
