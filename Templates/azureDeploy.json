@@ -106,9 +106,9 @@
     },
     "localAddressPRefix": {
       "metadata": {
-        "description": "Address Prefix of the on-premises network",
-        "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ]
+        "description": "Address Prefix of the on-premises network"
       },
+      "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ],
       "type": "array"
     },
     "localGatewayIPAddress": {
