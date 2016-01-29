@@ -1,5 +1,5 @@
 # azure-adfs-template
-* Creates ADFS Servers in Azure
+## Deploys Infrastructure Required for Running ADFS in Microsoft Azure
 * Deploys the following infrastructure:
  * Storage Account
  * Virtual Network
@@ -23,14 +23,25 @@
   _Note: Network Cards and Availability Sets are provisioned for VMs_
 
   * AD VMs - 2 VMs of size specified
+	* DSC to install ADDS Role
   * AD FS VMs - Number to be specified of size specified
+	* DSC to install ADFS Role
   * WAP VMs - Number to be specified (same as AD FS VMs)
+	* DSC to install Windows Application Proxy Role
 
+## Things to be aware of/Feature Backlog
+* There are no RDP Endpoints created on the VMs. If you cannot access the VPNs using the VPN created with the deployment, you'll have to add a Public IP to one of the ADFS or AD VMs and take it from there.
+* Domain Join, ADFS farm join/creation, and WAP farm join are not supported
+* I haven't actually tested the VPN capability!
 
-<<<<<<< HEAD
+##Known Issues
+* DSC to install the Windows Application Proxy Role will fail, causing the template deployment to fail. This warning can be ignored, but the WAP role will need to be manually installed
+====
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fnromyn%2Fazure-adfs-template%2Fmaster%2FTemplates%2FazureDeploy.json" target="_blank">
-=======
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fnromyn%2Fazure-adfs-template%2Fmaster%2FazureDeploy.json" target="_blank">
->>>>>>> 33c2dc400b7e6459edd42bbc6cd8e5aad83581fc
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
+
+<a href="http://armviz.io/#/?load=https://raw.githubusercontent.com/nromyn/azure-adfs-template/master/Templates/azureDeploy.json" target="_blank">
+  <img src="http://armviz.io/visualizebutton.png"/>
+</a>
+
