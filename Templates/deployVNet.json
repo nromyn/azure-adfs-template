@@ -745,11 +745,7 @@
       "location": "[parameters('location')]",
       "tags": { "displayName": "localGateway" },
       "properties": {
-        "localNetworkAddressSpace": {
-          "addressPrefixes": [
-            "[parameters('localAddressPrefix')]"
-          ]
-        },
+        "localNetworkAddressSpace": {"addressPrefixes": "[parameters('localAddressPrefix')]"},
         "gatewayIpAddress": "[parameters('localGatewayIpAddress')]"
       }
     },
