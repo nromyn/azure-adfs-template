@@ -139,7 +139,16 @@
         "description": "Arbitrary name for the new connection between Azure VNet and other network"
       }
     },
-
+  "gatewaySku": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "HighPerformance"
+      ],
+      "metadata": { "description": "Must be Basic for PolicyBased Routing" }
+    }
     "vpnType": {
       "type": "string",
       "metadata": {
@@ -746,7 +755,12 @@
       "tags": { "displayName": "localGateway" },
       "properties": {
         "localNetworkAddressSpace": {"addressPrefixes": "[parameters('localAddressPrefix')]"},
-        "gatewayIpAddress": "[parameters('localGatewayIpAddress')]"
+        "gatewayIpAddress": "[parameters('localGatewayIpAddress')]",
+        "sku": {
+          "name": "[parameters('gatewaySku')]",
+          "tier": "[parameters('gatewaySku')]"
+      }
+
       }
     },
     {
@@ -807,6 +821,11 @@
           }
         ],
         "gatewayType": "Vpn",
+         "sku": {
+        "name": "[parameters('gatewaySku')]",
+        "tier": "[parameters('gatewaySku')]"
+      }
+
         "vpnType": "[parameters('vpnType')]",
         "enableBgp": "false"
       }
