@@ -41,7 +41,7 @@
  
 ##Known Issues
 
-* DSC to install the Windows Application Proxy Role will fail, causing the template deployment to fail. This warning can be ignored, but the WAP role will need to be manually installed
+* DSC to install the WAP is not enabled
 
 ====
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fnromyn%2Fazure-adfs-template%2Fmaster%2FTemplates%2FazureDeploy.json" target="_blank">
