@@ -54,6 +54,8 @@
     "location": {
       "type": "string",
       "allowedValues": [
+        "Canada Central",
+        "Canada East",
         "Central US",
         "East US",
         "East US2",
@@ -482,37 +484,7 @@
             "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
           }
         }
-      },
-      "resources": [
-        {
-          "name": "wapDSC",
-          "type": "extensions",
-          "location": "[parameters('location')]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('wapVMName'), copyindex()))]"
-          ],
-          "tags": {
-            "displayName": "wapDSC"
-          },
-          "properties": {
-            "publisher": "Microsoft.Powershell",
-            "type": "DSC",
-            "typeHandlerVersion": "2.9",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "modulesUrl": "[variables('adfsDSCTemplate')]",
-              "configurationFunction": "[variables('adfsDSCConfigurationFunction')]",
-              "properties": {
-                "nodeName": "[concat(parameters('adfsVMName'), copyindex())]"
-              }
-            },
-            "protectedSettings": { }
-          }
-        }
-
-
-      ]
+      }
     }
   ]
 }
