@@ -148,7 +148,7 @@
         "HighPerformance"
       ],
       "metadata": { "description": "Must be Basic for PolicyBased Routing" }
-    }
+    },
     "vpnType": {
       "type": "string",
       "metadata": {
