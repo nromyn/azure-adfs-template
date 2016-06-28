@@ -25,7 +25,7 @@
     "onPremDNSIP": {
       "type": "string",
       "metadata": { "description": "The address of a domain controller on-premises" },
-      "defaultValue": "192.168.32.10/24"
+      "defaultValue": "192.168.32.10"
     },
     "subnets": {
       "type": "array",
@@ -93,7 +93,7 @@
     },
     "localAddressPrefix": {
       "type": "array",
-      "defaultValue": [ "10.0.1.0/24", "10.0.2.0/24", "192.168.0.0/16" ],
+      "defaultValue": [ 172.16.0.0/24, 192.168.0.0/16" ],
       "metadata": {
         "description": "CIDR block representing the address space of the OnPremise VPN network's Subnet"
       }
