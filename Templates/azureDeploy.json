@@ -131,7 +131,7 @@
     },
     "gatewaySubnetAddressRange": {
       "type": "string",
-      "defaultValue": "10.0.1.248/29",
+      "defaultValue": "10.0.4.248/29",
       "metadata": {
         "description": "Address space used by the VPN Gateway. It must be larger than a /29; it is recommended to keep it at /29 as you can't deploy into it"
       }
