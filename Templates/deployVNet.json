@@ -4,26 +4,6 @@
   "parameters": {
     "location": {
       "type": "string",
-      "allowedValues": [
-        "Central US",
-        "East US",
-        "East US2",
-        "North Central US",
-        "South Central US",
-        "West US",
-        "North Europe",
-        "West Europe",
-        "East Asia",
-        "Southeast Asia",
-        "Japan East",
-        "Japan West",
-        "Brazil South",
-        "Australia East",
-        "Australia Southeast",
-        "Central India",
-        "South India",
-        "West India"
-      ],
       "metadata": {
         "Description": "The region into which all resources will be deployed."
       }
@@ -83,7 +63,7 @@
         {
           "name": "gatewaySubnet",
           "properties": {
-            "addressprefix": "10.0.1.248/29"
+            "addressprefix": "10.0.4.248/29"
           }
         }
       ]
