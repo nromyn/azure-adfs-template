@@ -821,12 +821,11 @@
           }
         ],
         "gatewayType": "Vpn",
-         "sku": {
-        "name": "[parameters('gatewaySku')]",
-        "tier": "[parameters('gatewaySku')]"
-      }
-
-        "vpnType": "[parameters('vpnType')]",
+        "sku": {
+          "name": "[parameters('gatewaySku')]",
+          "tier": "[parameters('gatewaySku')]"
+        },
+        "vpnType" : "[parameters('vpnType')]",
         "enableBgp": "false"
       }
     }
